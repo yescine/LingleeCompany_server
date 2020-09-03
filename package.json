@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "NODE_ENV=production babel-node src/index.js",
-    "dev": "nodemon --exec NODE_ENV=development babel-node src/index.js",
+    "dev": "set NODE_ENV=development && nodemon --exec  babel-node src/index.js",
     "debug": "nodemon --exec NODE_ENV=development DEBUG=http,mail,express:* babel-node src/index.js"
   },
   "author": "",
@@ -41,6 +41,7 @@
     "mongoose": "^5.7.5",
     "mongoose-unique-validator": "^2.0.3",
     "morgan": "^1.9.1",
+    "nodemailer": "^6.4.11",
     "randomatic": "^3.1.1",
     "winston": "^3.2.1"
   }

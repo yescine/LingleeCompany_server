@@ -6,22 +6,9 @@ import ejs from "ejs-promise";
 import AppError from "../exeptions/AppError";
 import config from "../config";
 import logger from "../utils/logger";
-import {draftMail} from '../templates/mail/draftmail'
-const nodemailer = require('nodemailer');
 
 const root = path.join.bind(this, __dirname, "../../");
 const srcPath = path.join.bind(this, __dirname, "../");
-
-let transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 465,
-  ignoreTLS: false,
-  secure: true, // upgrade later with STARTTLS
-  auth: {
-    user: 'yescine.github@gmail.com',
-    pass: 'yescinedotgithub'
-  }
-});
 
 const saveEmailInFile = async data => {
 try {
@@ -71,38 +58,23 @@ const compileTemplate = async (template, data, options = {}) => {
 /* eslint no-param-reassign: ["error", { "props": false }] */
 const send = async data => {
   try {
-    data.link='localhost:3000'
-    let htmlEmail= draftMail(data)
-    let message = {
-      from: 'yescine.github@gmail.com',
-      to: data.email,
-      subject: data.subject,
-      text: '',
-      html:htmlEmail
-    };
-
-    transporter.sendMail(message, (err, info) => {
-      console.log('\x1b[36m%s\x1b[0m', 'email sending... !');
-      console.log('\x1b[32m%s\x1b[0m', 'error', err);
-
+    const mailgun = mailgunModule({
+      apiKey: config.mail.apiKey,
+      domain: config.mail.domain
     });
+    console.log(mailgun,'mailgun ----------------------------')
+    if (!data.from) {
+      data.from = config.mail.from;
+    }
 
-    // return await mailgun.messages().send(data);
+    if (config.app.isDev) {
+      return saveEmailInFile(data);
+    }
 
+    return await mailgun.messages().send(data);
   } catch (err) {
     logger.error(err.message, { type: "EMAIL_ERROR", data });
 
-    throw new AppError(err.message);
-  }
-};
-
-const sendWithDraft = async (data) => {
-  try {
-    
-    console.log('\x1b[36m%s\x1b[0m', 'configuring email');
-
-    return await send(data);
-  } catch (err) {
     throw new AppError(err.message);
   }
 };
@@ -127,4 +99,4 @@ const sendWithTemplate = async (data, templateOptions) => {
   }
 };
 
-export default { send, sendWithTemplate,sendWithDraft };
+export default { send, sendWithTemplate };

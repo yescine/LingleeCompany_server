@@ -30,5 +30,5 @@ app.use((req, res, next) => {
 app.use(errorHandler);
 
 app.listen(config.port, () => {
-  console.log(`Server started ${config.host}:${config.port}`);
+  console.log('\x1b[36m%s\x1b[0m',`Server started ${config.host}:${config.port}`);
 });

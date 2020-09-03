@@ -60,18 +60,12 @@ class AuthController {
 
     await user.save();
 
-    MailService.sendWithTemplate(
+    MailService.sendWithDraft(
       {
-        to: user.email,
-        subject: "Thanks for registering, your password is inside"
+        email: user.email,
+        subject: "Thanks for registering, your password is inside",
+        password
       },
-      {
-        template: "singup",
-        data: {
-          email: user.email,
-          password
-        }
-      }
     );
 
     res.json({ status: "success" });
