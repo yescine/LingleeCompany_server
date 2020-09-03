@@ -64,7 +64,9 @@ class AuthController {
       {
         email: user.email,
         subject: "Thanks for registering, your password is inside",
-        password
+        password,
+        link:'localhost:3000'+'/restore-password', //config.app.frontendHost;
+        template:'signup-verify'
       },
     );
 
@@ -122,25 +124,25 @@ class AuthController {
   @TryCatchErrorDecorator
   static async restorePassword(req, res, next) {
     const user = await UserModel.findOne({ email: req.body.email });
+    console.log('new password',req.body.password)
 
     if (!user) {
       throw new ClientError("User not found", 404);
     }
+    
+    // change password here;
+    await user.update({restorePassword: await PasswordService.hashPassword(req.body.password)})
 
     const token = await TokenService.createRestorePasswordToken(user);
 
-    MailService.sendWithTemplate(
+    MailService.sendWithDraft(
       {
-        to: user.email,
-        subject: "Restore password"
+        email: user.email,
+        subject: "Restore password",
+        password:req.body.password,
+        link:'localhost:3000'+'/confirm-restore-password/'+token, //config.app.frontendHost;
+        template:'restore-password'
       },
-      {
-        template: "restorePassword",
-        data: {
-          host: config.frontendHost,
-          token
-        }
-      }
     );
 
     res.json({ status: "success" });
@@ -159,22 +161,15 @@ class AuthController {
     }
 
     const user = await UserModel.findOne({ _id: verifyData.id });
-    const password = randomize.generateString(12);
 
-    user.password = await PasswordService.hashPassword(password);
-    await user.save();
+    await user.update({password: user.restorePassword })
 
-    MailService.sendWithTemplate(
+    MailService.sendWithDraft(
       {
-        to: user.email,
-        subject: "New password"
+        email: user.email,
+        subject: "New password",
+        template:'confirm-restore-password'
       },
-      {
-        template: "confirmRestorePassword",
-        data: {
-          password
-        }
-      }
     );
 
     res.json({ status: "success" });

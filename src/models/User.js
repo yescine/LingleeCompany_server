@@ -21,6 +21,11 @@ const UserSchema = new Schema(
       required: true,
       minlength: 8
     },
+    restorePassword: {
+      type: String,
+      required: false,
+      minlength: 8
+    },
     email: {
       type: String,
       required: true,

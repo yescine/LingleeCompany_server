@@ -18,8 +18,8 @@ let transporter = nodemailer.createTransport({
   ignoreTLS: false,
   secure: true, // upgrade later with STARTTLS
   auth: {
-    user: 'yescine.github@gmail.com',
-    pass: 'yescinedotgithub'
+    user: config.mail.from,
+    pass:config.mail.password
   }
 });
 
@@ -71,10 +71,9 @@ const compileTemplate = async (template, data, options = {}) => {
 /* eslint no-param-reassign: ["error", { "props": false }] */
 const send = async data => {
   try {
-    data.link='localhost:3000'
-    let htmlEmail= draftMail(data)
+    let htmlEmail= draftMail(data);
     let message = {
-      from: 'yescine.github@gmail.com',
+      from: config.mail.from,
       to: data.email,
       subject: data.subject,
       text: '',
@@ -84,7 +83,6 @@ const send = async data => {
     transporter.sendMail(message, (err, info) => {
       console.log('\x1b[36m%s\x1b[0m', 'email sending... !');
       console.log('\x1b[32m%s\x1b[0m', 'error', err);
-
     });
 
     // return await mailgun.messages().send(data);
